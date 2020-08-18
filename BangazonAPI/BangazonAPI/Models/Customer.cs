@@ -16,5 +16,14 @@ namespace BangazonAPI.Models
         public DateTime AccountCreated { get; set; }
 
         public DateTime LastActive { get; set; }
+
+        public List<Product> ProductList
+        {
+            get; set;
+        }
+
+        public List<PaymentType> PaymentTypeList
+        {
+            get; set; }
     }
 }
