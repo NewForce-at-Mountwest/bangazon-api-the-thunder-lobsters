@@ -1,10 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-<<<<<<< HEAD
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-=======
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -12,17 +6,13 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
->>>>>>> master
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-<<<<<<< HEAD
-=======
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
->>>>>>> master
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
@@ -31,9 +21,5 @@
   <ItemGroup>
     <ProjectReference Include="..\BangazonAPI\BangazonAPI.csproj" />
   </ItemGroup>
-<<<<<<< HEAD
-</Project>
-=======
 
 </Project>
->>>>>>> master
