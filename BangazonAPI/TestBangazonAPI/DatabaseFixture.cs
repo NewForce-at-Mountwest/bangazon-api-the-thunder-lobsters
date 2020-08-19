@@ -9,6 +9,7 @@ namespace BangazonAPITests
 {
     public class DatabaseFixture : IDisposable
     {
+<<<<<<< HEAD
 
         private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS;Database=BangazonAPI;Trusted_Connection=True;";
 
@@ -28,6 +29,35 @@ namespace BangazonAPITests
                 LastName = "Test name",
                 CreationDate = "2020-08-16",
                 LastActiveDate = "2020-08-16"
+=======
+        private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS01;Database=BangazonAPI;Trusted_Connection=True;";
+
+        //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
+        public Product TestProduct { get; set; }
+        public Product TestDeleteProduct { get; set; }
+        public DatabaseFixture()
+        {
+            //Object for GET, POST, PUT
+            Product newProduct = new Product
+            {
+                ProductTypeId = 1,
+                CustomerId = 1,
+                Price = Convert.ToDecimal(1.80),
+                Title = "Integration Test Product",
+                Description = "Integration Test Product",
+                Quantity = 1
+            };
+
+            //Object for DELETE
+            Product newDeleteProduct = new Product
+            {
+                ProductTypeId = 1,
+                CustomerId = 1,
+                Price = Convert.ToDecimal(1.80),
+                Title = "Integration Test Product",
+                Description = "Integration Delete Test Product",
+                Quantity = 1
+>>>>>>> master
             };
 
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -35,6 +65,7 @@ namespace BangazonAPITests
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+<<<<<<< HEAD
                     cmd.CommandText = @$"INSERT INTO Customer (FirstName, LastName, CreationDate, LastActiveDate)
                                         OUTPUT INSERTED.Id
                                         VALUES ('{newCustomer.FirstName}', '{newCustomer.LastName}', '{newCustomer.CreationDate}', '{newCustomer.LastActiveDate}')";
@@ -50,6 +81,31 @@ namespace BangazonAPITests
 
         }
 
+=======
+                    //Inserts the first object into the database
+                    cmd.CommandText = $@"INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
+                                        OUTPUT INSERTED.Id
+                                        VALUES ({newProduct.ProductTypeId}, {newProduct.CustomerId}, {newProduct.Price}, '{newProduct.Title}', '{newProduct.Description}', {newProduct.Quantity})";
+
+                    //Executes the above query, returns the id of the newly created object, assigns the id to the newProduct, then sets it to the global TestProduct variable
+                    int newId = (int)cmd.ExecuteScalar();
+                    newProduct.Id = newId;
+                    TestProduct = newProduct;
+                }
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    //Executes exactly like the first object creation
+                    cmd.CommandText = $@"INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
+                                        OUTPUT INSERTED.Id
+                                        VALUES ({newDeleteProduct.ProductTypeId}, {newDeleteProduct.CustomerId}, {newDeleteProduct.Price}, '{newDeleteProduct.Title}', '{newDeleteProduct.Description}', {newDeleteProduct.Quantity})";
+                    int newId = (int)cmd.ExecuteScalar();
+                    newDeleteProduct.Id = newId;
+                    TestDeleteProduct = newDeleteProduct;
+                }
+            }
+        }
+>>>>>>> master
         public void Dispose()
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -57,13 +113,21 @@ namespace BangazonAPITests
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+<<<<<<< HEAD
                     cmd.CommandText = @$"DELETE FROM Customer WHERE FirstName ='Test name'";
 
+=======
+                    //Disposes of all test products when the tests finish
+                    cmd.CommandText = @$"DELETE FROM Product WHERE Title='Integration Test Product'";
+>>>>>>> master
                     cmd.ExecuteNonQuery();
                 }
             }
         }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> master
     }
 }
