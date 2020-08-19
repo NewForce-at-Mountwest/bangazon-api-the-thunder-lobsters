@@ -22,6 +22,7 @@ namespace StudentExercisesAPI.Controllers
             _config = config;
         }
 
+        //Creates a new SQL connection to edit the database
         public SqlConnection Connection
         {
             get
@@ -30,6 +31,7 @@ namespace StudentExercisesAPI.Controllers
             }
         }
 
+        //A method to get all objects in the selected table in the database. Enables GET in the API
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -41,12 +43,16 @@ namespace StudentExercisesAPI.Controllers
                     string query = @"SELECT Id, ProductTypeId, CustomerId, Price, Title, Description, Quantity 
                                     FROM Product ";
                     
+                    //Executes the command to get all objects
                     cmd.CommandText = query;
                     SqlDataReader reader = cmd.ExecuteReader();
+
+                    //A list to hold the C# version of the SQL objects
                     List<Product> productList = new List<Product>();
 
                     while (reader.Read())
                     {
+                        //Creates a new object from the data found in the corresponding columns of the database
                         Product productFromRepo = new Product
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -60,13 +66,16 @@ namespace StudentExercisesAPI.Controllers
 
                         productList.Add(productFromRepo);
                     }
+                    //Closes the SQL reader
                     reader.Close();
 
+                    //Returns a 200 status code and the newly created object list
                     return Ok(productList);
                 }
             }
         }
 
+        //A method to get a single object in the selected table in the database. Enables GET in the API
         [HttpGet("{id}", Name = "GetProduct")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
@@ -75,6 +84,7 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //Executes the command to get an object
                     cmd.CommandText = @"SELECT Id, ProductTypeId, CustomerId, Price, Title, Description, Quantity 
                                         FROM Product 
                                         WHERE Id = @id";
@@ -85,6 +95,7 @@ namespace StudentExercisesAPI.Controllers
 
                     if (reader.Read())
                     {
+                        //Creates a new object from the data found in the corresponding columns of the database
                         productFromRepo = new Product
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -96,13 +107,16 @@ namespace StudentExercisesAPI.Controllers
                             Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
                         };
                     }
+                    //Closes the SQL reader
                     reader.Close();
 
+                    //Returns a 200 status code and the newly created object
                     return Ok(productFromRepo);
                 }
             }
         }
 
+        //A method to create a new object and add it to the database. Enables use of the POST command. Accepts a C# object as a parameter -- this object will be added to the database.
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product productToAdd)
         {
@@ -111,6 +125,7 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //SQL query to insert the object parameter into the database. Properties of the object are passed into the query as SQL parameters
                     cmd.CommandText = @"INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
                                         OUTPUT INSERTED.Id
                                         VALUES (@productTypeId, @customerId, @price, @title, @description, @quantity)";
@@ -123,11 +138,14 @@ namespace StudentExercisesAPI.Controllers
 
                     int newId = (int)cmd.ExecuteScalar();
                     productToAdd.Id = newId;
+
+                    //Returns a 201 status code and the newly created object
                     return CreatedAtRoute("GetProduct", new { id = newId }, productToAdd);
                 }
             }
         }
 
+        //Allows the user to edit any given object in the database. Enables usage of the PUT command. Accepts two parameters: the id of the object to edit, and an object containing the new properties for the edit object
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Product productToAdd)
         {
@@ -138,6 +156,7 @@ namespace StudentExercisesAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
+                        //SQL query to update the object at the id in the database. Properties of the object parameter are passed into the query as SQL parameters
                         cmd.CommandText = @"UPDATE Product
                                             SET ProductTypeId = @productTypeId,
                                                 CustomerId = @customerId,
@@ -155,6 +174,8 @@ namespace StudentExercisesAPI.Controllers
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
+
+                        //If any rows are affected, returns a 204 status. Otherwise, outputs "no rows affected"
                         if (rowsAffected > 0)
                         {
                             return new StatusCodeResult(StatusCodes.Status204NoContent);
@@ -163,8 +184,11 @@ namespace StudentExercisesAPI.Controllers
                     }
                 }
             }
+
+            //Catches the above exception, if thrown
             catch (Exception)
             {
+                //Returns a 404 if no object exists at the passed-in id
                 if (!ProductExists(id))
                 {
                     return NotFound();
@@ -176,6 +200,7 @@ namespace StudentExercisesAPI.Controllers
             }
         }
 
+        //Allows the user to delete objects from the database. Enables use of the DELETE command. Accepts a parameter for the id of the object to be deleted
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -186,10 +211,13 @@ namespace StudentExercisesAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
+                        //Performs a SQL query to delete the object at the id parameter
                         cmd.CommandText = @"DELETE FROM Product WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
+
+                        //If any rows are affected, returns a 204 status. Otherwise, outputs "no rows affected"
                         if (rowsAffected > 0)
                         {
                             return new StatusCodeResult(StatusCodes.Status204NoContent);
@@ -198,8 +226,11 @@ namespace StudentExercisesAPI.Controllers
                     }
                 }
             }
+
+            //Catches the above exception, if thrown
             catch (Exception)
             {
+                //Returns a 404 if no object exists at the passed-in id
                 if (!ProductExists(id))
                 {
                     return NotFound();
@@ -211,6 +242,7 @@ namespace StudentExercisesAPI.Controllers
             }
         }
 
+        //A method to check if an object exists in the database, used by the Delete and Edit methods. Accepts an id parameter to know which object to check the existence of
         private bool ProductExists(int id)
         {
             using (SqlConnection conn = Connection)
@@ -218,12 +250,15 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //Executes SQL query to select the desired object
                     cmd.CommandText = @"SELECT Id, ProductTypeId, CustomerId, Price, Title, Description, Quantity 
                                         FROM Product 
                                         WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     SqlDataReader reader = cmd.ExecuteReader();
+
+                    //Returns true if an object exists and the reader has something to read, else is false
                     return reader.Read();
                 }
             }
