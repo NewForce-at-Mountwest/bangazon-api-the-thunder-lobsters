@@ -32,14 +32,27 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string sort, string FirstNameParam, string LastNameParam, int Limit)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT c.Id, c.FirstName, c.LastName, c.CreationDate, c.LastActiveDate FROM Customer c";
+                    string query = "SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer";
+                    if (Limit != 0)
+                    {
+                        query = $"SELECT TOP {Limit} Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer";
+                    }
+                    if (FirstNameParam == "mic")
+                    {
+                        query = $"WHERE FirstName LIKE '%{FirstNameParam}%'";
+                    }
+                    if (LastNameParam == "mic")
+                    {
+                        query = $"WHERE LastName LIKE '%{LastNameParam}%'";
+                    }
+                    cmd.CommandText = query;
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Customer> customers = new List<Customer>();
 
