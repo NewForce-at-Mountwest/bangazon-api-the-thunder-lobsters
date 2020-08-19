@@ -26,8 +26,8 @@ namespace BangazonAPITests
             {
                 FirstName = "Test name",
                 LastName = "Test name",
-                CreationDate = new DateTime(1234, 12, 12, 12, 12, 12),
-                LastActiveDate = new DateTime(1234, 12, 12, 12, 12, 12)
+                CreationDate = "2020-08-16",
+                LastActiveDate = "2020-08-16"
             };
 
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -57,7 +57,7 @@ namespace BangazonAPITests
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @$"DELETE FROM Customer WHERE FirstName='Test Name'";
+                    cmd.CommandText = @$"DELETE FROM Customer WHERE FirstName ='Test name'";
 
                     cmd.ExecuteNonQuery();
                 }

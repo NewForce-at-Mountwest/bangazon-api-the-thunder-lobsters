@@ -50,8 +50,8 @@ namespace BangazonAPI.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")),
-                            LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
+                            CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")).ToString(),
+                            LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate")).ToString()
                           
                             
                         };
@@ -90,8 +90,8 @@ namespace BangazonAPI.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")),
-                            LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
+                            CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")).ToString(),
+                            LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate")).ToString()
                             
                         };
                     }
@@ -143,7 +143,7 @@ namespace BangazonAPI.Controllers
                                             SET FirstName = @FirstName,
                                                 LastName = @LastName,
                                                 CreationDate = @CreationDate,
-                                                LastActiveDate = @LastActiveDate,
+                                                LastActiveDate = @LastActiveDate
                                             WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@FirstName", customer.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@LastName", customer.LastName));

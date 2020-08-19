@@ -47,8 +47,8 @@ namespace BangazonAPITest
                 {
                     FirstName = "Test name",
                     LastName = "Test name",
-                    CreationDate = new DateTime(1234, 12, 12, 12, 12, 12),
-                    LastActiveDate = new DateTime(1234, 12, 12, 12, 12, 12)
+                    CreationDate = "2020-08-16",
+                    LastActiveDate = "2020-08-16"
                 };
                 string jsonCustomer = JsonConvert.SerializeObject(newCustomer);
                 // Act
@@ -87,8 +87,8 @@ namespace BangazonAPITest
                 {
                     FirstName = "Edit Test name",
                     LastName = "Edit Test name",
-                    CreationDate = new DateTime(1234, 12, 12, 12, 12, 12),
-                    LastActiveDate = new DateTime(1234, 12, 12, 12, 12, 12)
+                    CreationDate = "2020-08-16",
+                    LastActiveDate = "2020-08-16"
                 };
                 // Act
                 string jsonCustomer = JsonConvert.SerializeObject(editedCustomer);
@@ -121,8 +121,8 @@ namespace BangazonAPITest
                 {
                     FirstName = "Edit Test name",
                     LastName = "Edit Test name",
-                    CreationDate = new DateTime(1234, 12, 12, 12, 12, 12),
-                    LastActiveDate = new DateTime(1234, 12, 12, 12, 12, 12)
+                    CreationDate = "2020-08-16",
+                    LastActiveDate = "2020-08-16"
                 };
                 // Act
                 string jsonCustomer = JsonConvert.SerializeObject(editedCustomer);
