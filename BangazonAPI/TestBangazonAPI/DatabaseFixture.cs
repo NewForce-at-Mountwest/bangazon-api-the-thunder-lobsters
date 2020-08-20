@@ -10,7 +10,6 @@ namespace BangazonAPITests
 {
     public class DatabaseFixture : IDisposable
     {
-<<<<<<< HEAD
 
         private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS;Database=BangazonAPI;Trusted_Connection=True;";
 
@@ -22,17 +21,14 @@ namespace BangazonAPITests
         }
         
         //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
-=======
-        private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS03;Database=BangazonAPI;Trusted_Connection=True;";
+       
         public PaymentType TestPaymentType { get; set; }
    
  //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
->>>>>>> master
         public Product TestProduct { get; set; }
         public Product TestDeleteProduct { get; set; }
         public DatabaseFixture()
         {
-<<<<<<< HEAD
 
             Customer newCustomer = new Customer
             {
@@ -46,7 +42,6 @@ namespace BangazonAPITests
         
 
         
-=======
               PaymentType newpaymenttype = new PaymentType
             {
                 
@@ -54,7 +49,6 @@ namespace BangazonAPITests
                 Name = "hkkdkldnhjsk",
                 CustomerId = 2
             };
->>>>>>> master
             //Object for GET, POST, PUT
             Product newProduct = new Product
             {
@@ -82,7 +76,6 @@ namespace BangazonAPITests
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-<<<<<<< HEAD
                     cmd.CommandText = @$"INSERT INTO Customer (FirstName, LastName, CreationDate, LastActiveDate)
                                         OUTPUT INSERTED.Id
                                         VALUES ('{newCustomer.FirstName}', '{newCustomer.LastName}', '{newCustomer.CreationDate}', '{newCustomer.LastActiveDate}')";
@@ -95,7 +88,6 @@ namespace BangazonAPITests
                     TestCustomer = newCustomer;
                 }
             
-=======
                     cmd.CommandText = @$"INSERT INTO PaymentType (AcctNumber, Name, CustomerId)
                                         OUTPUT INSERTED.Id
                                         VALUES ('{newpaymenttype.AcctNumber}', '{newpaymenttype.Name}', '{newpaymenttype.CustomerId}')";
@@ -103,7 +95,6 @@ namespace BangazonAPITests
                     newpaymenttype.Id = newId;
                     TestPaymentType = newpaymenttype;
                 }
->>>>>>> master
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     //Inserts the first object into the database
@@ -136,14 +127,11 @@ namespace BangazonAPITests
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-<<<<<<< HEAD
                     cmd.CommandText = @$"DELETE FROM Customer WHERE FirstName ='Test name'";
                     cmd.ExecuteNonQuery();
                     
-=======
                     cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test'";
                     cmd.ExecuteNonQuery();
->>>>>>> master
                     //Disposes of all test products when the tests finish
                     cmd.CommandText = @$"DELETE FROM Product WHERE Title='Integration Test Product'";
                     cmd.ExecuteNonQuery();
