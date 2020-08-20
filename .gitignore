@@ -352,3 +352,5 @@ obj
 .DS_Store
 .vs
 node_modules
+
+BangazonAPI/BangazonAPI/appsettings.json
