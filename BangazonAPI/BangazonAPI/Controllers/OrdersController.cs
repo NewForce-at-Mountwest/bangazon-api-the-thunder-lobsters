@@ -35,15 +35,30 @@ namespace StudentExercisesAPI.Controllers
 
         //A method to get all objects in the selected table in the database. Enables GET in the API
         [HttpGet]
-        public async Task<IActionResult> Get(string _completed)
+        public async Task<IActionResult> Get(string _completed, string _include)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    string query = @"SELECT Id, CustomerId, PaymentTypeId 
-                                     FROM [Order] ";
+                    string query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId'
+                                     FROM [Order] o ";
+
+                    if (_include == "products")
+                    {
+                        query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', p.Id AS 'ProductKey', p.ProductTypeId, p.CustomerId as 'ProductCustomerId', p.Price, p.Title, p.Description, p.Quantity
+                                  FROM [Order] o 
+                                  LEFT JOIN OrderProduct op ON o.Id = op.OrderId
+                                  LEFT JOIN Product p ON op.ProductId = p.Id ";
+                    }
+
+                    if (_include == "customer")
+                    {
+                        query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', c.Id AS 'CustomerKey', c.FirstName, c.LastName, c.CreationDate, c.LastActiveDate
+                                  FROM [Order] o 
+                                  LEFT JOIN Customer c ON o.CustomerId = c.Id";
+                    }
 
                     if (_completed == "false")
                     {
@@ -63,15 +78,74 @@ namespace StudentExercisesAPI.Controllers
 
                     while (reader.Read())
                     {
+                        Order orderFromRepo = null;
                         //Creates a new object from the data found in the corresponding columns of the database
-                        Order orderFromRepo = new Order
+                        if (!reader.IsDBNull("OrderPaymentTypeId"))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
-                        };
+                            orderFromRepo = new Order
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("OrderKey")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("OrderCustomerId")),
+                                PaymentTypeId = reader.GetInt32(reader.GetOrdinal("OrderPaymentTypeId"))
+                            };
+                        }
+                        else
+                        {
+                            orderFromRepo = new Order
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("OrderKey")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("OrderCustomerId")),
+                                PaymentTypeId = null
+                            };
+                        }
 
-                        orderList.Add(orderFromRepo);
+                        if (!orderList.Any(orderFromList => orderFromList.Id == orderFromRepo.Id))
+                        {
+                            orderList.Add(orderFromRepo);
+                        }
+
+                        if (_include == "products")
+                        {
+                            Order orderToAddTo = orderList.FirstOrDefault(orderFromList => orderFromList.Id == orderFromRepo.Id);
+
+                            if (!reader.IsDBNull("ProductKey"))
+                            {
+                                Product productFromRepo = new Product
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductKey")),
+                                    ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    CustomerId = reader.GetInt32(reader.GetOrdinal("ProductCustomerId")),
+                                    Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                    Title = reader.GetString(reader.GetOrdinal("Title")),
+                                    Description = reader.GetString(reader.GetOrdinal("Description")),
+                                    Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                                };
+
+                                if (!orderToAddTo.productsInOrder.Any(productFromList => productFromList.Id == productFromRepo.Id))
+                                {
+                                    orderToAddTo.productsInOrder.Add(productFromRepo);
+                                }
+                            }
+                        }
+
+                        if (_include == "customer")
+                        {
+                            Order orderToAddTo = orderList.FirstOrDefault(orderFromList => orderFromList.Id == orderFromRepo.Id);
+
+                            if (!reader.IsDBNull("CustomerKey"))
+                            {
+                                Customer customerFromRepo = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("CustomerKey")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    AccountCreated = reader.GetDateTime(reader.GetOrdinal("CreationDate")),
+                                    LastActive = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
+                                };
+
+                                orderToAddTo.customerForOrder = customerFromRepo; 
+                            }
+                        }
                     }
                     //Closes the SQL reader
                     reader.Close();
@@ -84,30 +158,98 @@ namespace StudentExercisesAPI.Controllers
 
         //A method to get a single object in the selected table in the database. Enables GET in the API
         [HttpGet("{id}", Name = "GetOrder")]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        public async Task<IActionResult> Get([FromRoute] int id, string _include)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    //Executes the command to get an object
-                    cmd.CommandText = @"SELECT Id, CustomerId, PaymentTypeId
-                                        FROM [Order] 
-                                        WHERE Id = @id";
+                    string query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId'
+                                     FROM [Order] o 
+                                     WHERE o.Id = @id ";
+
+                    if (_include == "products")
+                    {
+                        query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', p.Id AS 'ProductKey', p.ProductTypeId, p.CustomerId as 'ProductCustomerId', p.Price, p.Title, p.Description, p.Quantity
+                                  FROM [Order] o 
+                                  LEFT JOIN OrderProduct op ON o.Id = op.OrderId
+                                  LEFT JOIN Product p ON op.ProductId = p.Id 
+                                  WHERE o.Id = @id ";
+                    }
+
+                    if (_include == "customer")
+                    {
+                        query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', c.Id AS 'CustomerKey', c.FirstName, c.LastName, c.CreationDate, c.LastActiveDate
+                                  FROM [Order] o 
+                                  LEFT JOIN Customer c ON o.CustomerId = c.Id
+                                  WHERE o.Id = @id ";
+                    }
+
+                    //Executes the command to get one object
+                    cmd.CommandText = query;
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
+
                     Order orderFromRepo = null;
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         //Creates a new object from the data found in the corresponding columns of the database
-                        orderFromRepo = new Order
+                        if (!reader.IsDBNull("OrderPaymentTypeId"))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
-                        };
+                            orderFromRepo = new Order
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("OrderKey")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("OrderCustomerId")),
+                                PaymentTypeId = reader.GetInt32(reader.GetOrdinal("OrderPaymentTypeId"))
+                            };
+                        }
+                        else
+                        {
+                            orderFromRepo = new Order
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("OrderKey")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("OrderCustomerId")),
+                                PaymentTypeId = null
+                            };
+                        }
+
+                        if (_include == "products")
+                        {
+                            if (!reader.IsDBNull("ProductKey"))
+                            {
+                                Product productFromRepo = new Product
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductKey")),
+                                    ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    CustomerId = reader.GetInt32(reader.GetOrdinal("ProductCustomerId")),
+                                    Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                    Title = reader.GetString(reader.GetOrdinal("Title")),
+                                    Description = reader.GetString(reader.GetOrdinal("Description")),
+                                    Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                                };
+
+                                orderFromRepo.productsInOrder.Add(productFromRepo);
+                            }
+                        }
+
+                        if (_include == "customer")
+                        {
+                            if (!reader.IsDBNull("CustomerKey"))
+                            {
+                                Customer customerFromRepo = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("CustomerKey")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    AccountCreated = reader.GetDateTime(reader.GetOrdinal("CreationDate")),
+                                    LastActive = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
+                                };
+
+                                orderFromRepo.customerForOrder = customerFromRepo;
+                            }
+                        }
                     }
                     //Closes the SQL reader
                     reader.Close();
@@ -127,13 +269,24 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    //SQL query to insert the object parameter into the database. Properties of the object are passed into the query as SQL parameters
-                    cmd.CommandText = @"INSERT INTO [Order] (CustomerId, PaymentTypeId)
+                    if (orderToAdd.PaymentTypeId != null)
+                    {
+                        //SQL query to insert the object parameter into the database. Properties of the object are passed into the query as SQL parameters
+                        cmd.CommandText = @"INSERT INTO [Order] (CustomerId, PaymentTypeId)
                                         OUTPUT INSERTED.Id
                                         VALUES (@customerId, @paymentTypeId)";
-                    
-                    cmd.Parameters.Add(new SqlParameter("@customerId", orderToAdd.CustomerId));
-                    cmd.Parameters.Add(new SqlParameter("@paymentTypeId", orderToAdd.PaymentTypeId));
+
+                        cmd.Parameters.Add(new SqlParameter("@customerId", orderToAdd.CustomerId));
+                        cmd.Parameters.Add(new SqlParameter("@paymentTypeId", orderToAdd.PaymentTypeId));
+                    }
+                    else
+                    {
+                        cmd.CommandText = @"INSERT INTO [Order] (CustomerId)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@customerId)";
+
+                        cmd.Parameters.Add(new SqlParameter("@customerId", orderToAdd.CustomerId));
+                    }
 
                     int newId = (int)cmd.ExecuteScalar();
                     orderToAdd.Id = newId;
