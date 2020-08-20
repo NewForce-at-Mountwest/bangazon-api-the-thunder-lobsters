@@ -31,6 +31,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+
+        //gets all of the payment types
         // GET: api/<PaymentTypeController>
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -63,6 +65,8 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
+        //gets a single payment type
 
         // GET api/<PaymentTypeController>/5
         
@@ -101,6 +105,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+        //posts a new payment type
+
         // POST api/<PaymentTypeController>
         [HttpPost]
 
@@ -124,6 +130,8 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
+        //edits  a existing payment type
         // PUT api/<PaymentTypeController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] PaymentType paymenttype)
@@ -166,7 +174,8 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        
+        //deletes an exitsing payment type
         // DELETE api/<PaymentTypeController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
@@ -203,7 +212,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-
+        //checks to see if a payment type exists based off of an Id
         private bool PaymentTypeExists(int id)
         {
             using (SqlConnection conn = Connection)
