@@ -26,12 +26,12 @@ namespace BangazonAPI.Models
         [StringLength(25)]
         public string LastActiveDate { get; set; }
 
-        public List<Product> ProductList
+        public List<Product> products
         {
             get; set;
         } = new List<Product>();
 
-        public List<PaymentType> PaymentTypeList
+        public List<PaymentType> payments
         {
             get; set;
         } = new List<PaymentType>();

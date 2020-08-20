@@ -30,35 +30,41 @@ namespace BangazonAPI.Controllers
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-
+        //GET ALL with query string parameters to enable the user to view products and payment types with customer.
+        //GET ALL also allows user to see if any properties contain a string typed in by the user in the form of 'q'
+        // '%{ q }%' allows string query to check if q is contained anywhere in the property
         [HttpGet]
-        public async Task<IActionResult> Get(string include, string q)
+        public async Task<IActionResult> Get(string _include, string q)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    string query = "SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer";
-                    if (include == "products")
+                    string query = "SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer ";
+                    if (_include == "products")
+                    {
+                        query = @$"SELECT c.Id AS 'Id', c.FirstName AS 'FirstName', c.LastName AS 'LastName', 
+                            c.CreationDate AS 'CreationDate', c.LastActiveDate AS 'LastActiveDate', 
+                            p.Id AS 'ProductId', p.ProductTypeId AS 'ProductTypeId', p.price AS 'Price', 
+                            p.title AS 'title', p.quantity AS 'Quantity', p.description AS 'Description' FROM Customer c
+                            LEFT JOIN product p ON p.customerId = c.Id ";
+                    }
+                    if (_include == "payments")
                     {
                         query = $"SELECT c.Id AS 'Id', c.FirstName AS 'FirstName', c.LastName AS 'LastName', " +
-                            $"c.CreationDate AS 'CreationDate', c.LastActiveDate AS 'LastActive', " +
-                            $"p.Id AS 'ProductId', p.ProductTypeId AS 'ProductTypeId', p.price AS 'Price'," +
-                            $"p.title AS 'title', p.quantity AS 'Quantity', p.description AS 'Description' FROM Customer c" +
-                            $"JOIN product p ON p.customerId = c.Id";
+                            $"c.CreationDate AS 'CreationDate', c.LastActiveDate AS 'LastActiveDate', " +
+                            $"t.AcctNumber AS 'Account#', t.Id AS 'PaymentTypeId', t.Name AS 'PaymentName' " +
+                            $"FROM Customer c FULL JOIN PaymentType t ON t.CustomerId = c.Id ";
                     }
-                    if (include == "payments")
+                    if (q != null)
                     {
-                        query = $"SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer WHERE FirstName LIKE %{FirstNameParam}%";
-                    }
-                    if (LastNameParam == "mic")
-                    {
-                        query = $"SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer WHERE LastName LIKE %{LastNameParam}%";
+                        query += $"WHERE FirstName LIKE '%{q}%' OR LastName LIKE '%{q}%'";
                     }
                     cmd.CommandText = query;
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Customer> customers = new List<Customer>();
+                   
 
                     while (reader.Read())
                     {
@@ -68,12 +74,68 @@ namespace BangazonAPI.Controllers
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")).ToString(),
-                            LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate")).ToString()
+                            LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate")).ToString(),
                           
                             
                         };
 
-                        customers.Add(customer);
+                        if (_include == "payments")
+                        {
+                            PaymentType paymentType = new PaymentType
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("PaymentTypeId")),
+                                AcctNumber = reader.GetInt32(reader.GetOrdinal("Account#")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Name = reader.GetString(reader.GetOrdinal("PaymentName"))
+                            };
+
+                            if (customers.FirstOrDefault(customer => customer.Id == paymentType.CustomerId) == null)
+                            {
+                                customer.payments.Add(paymentType);
+                                customers.Add(customer);
+                            }
+                            else
+                            {
+                                Customer customerWithPayment = customers.FirstOrDefault(customer => customer.Id == paymentType.CustomerId);
+                                customerWithPayment.payments.Add(paymentType);
+                            }
+                        }
+                        else if (_include == "products")
+                        {
+                            Product product = new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                Title = reader.GetString(reader.GetOrdinal("title")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                            };
+
+                            if (customers.FirstOrDefault(customer => customer.Id == product.CustomerId) == null)
+                            {
+                                customer.products.Add(product);
+                                customers.Add(customer);
+                            }
+                            else
+                            {
+                                Customer customerWithProducts = customers.FirstOrDefault(customer => customer.Id == product.CustomerId);
+                                customerWithProducts.products.Add(product);
+                            }
+
+                            if (customers.FirstOrDefault(customer => customer.Id == product.CustomerId) == null)
+                            {
+                                customers.Add(customer);
+                            }
+
+                        }
+                        else
+                        {
+                            customers.Add(customer);
+                        }
+
+                        
                     }
                     reader.Close();
 
