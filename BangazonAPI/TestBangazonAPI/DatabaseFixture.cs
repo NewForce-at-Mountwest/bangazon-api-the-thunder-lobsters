@@ -92,6 +92,7 @@ namespace TestBangazonAPI
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test'";
+                    cmd.ExecuteNonQuery();
                     //Disposes of all test products when the tests finish
                     cmd.CommandText = @$"DELETE FROM Product WHERE Title='Integration Test Product'";
                     cmd.ExecuteNonQuery();

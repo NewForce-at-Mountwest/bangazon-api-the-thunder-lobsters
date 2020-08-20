@@ -92,8 +92,8 @@ namespace TestBangazonAPI
                 //Creates an edited version of the test product
                 PaymentType editedPaymentType = new PaymentType()
                 {
-                    AcctNumber = "test1",
-                    Name = "hkkdkldnhjsk",
+                    AcctNumber = "test",
+                    Name = "test",
                     CustomerId = 2
                 };
                 // Act
