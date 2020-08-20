@@ -9,7 +9,7 @@ namespace BangazonAPI.Models
     {
         public int Id { get; set; }
 
-        public int AcctNumber { get; set; }
+        public string  AcctNumber { get; set; }
 
         public string Name { get; set; }
 

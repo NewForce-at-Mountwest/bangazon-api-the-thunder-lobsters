@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using Xunit;
+
 namespace TestBangazonAPI
 {
     class APIClientProvider : IClassFixture<WebApplicationFactory<Startup>>
