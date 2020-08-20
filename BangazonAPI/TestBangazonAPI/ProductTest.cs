@@ -55,7 +55,7 @@ namespace TestBangazonAPI
                 Product newProduct = new Product
                 {
                     ProductTypeId = 1,
-                    CustomerId = 1,
+                    CustomerId = 2,
                     Price = Convert.ToDecimal(1.80),
                     Title = "Integration Test Product",
                     Description = "Integration Test Product",
@@ -106,7 +106,7 @@ namespace TestBangazonAPI
                 Product editedProduct = new Product
                 {
                     ProductTypeId = 1,
-                    CustomerId = 1,
+                    CustomerId = 2,
                     Price = Convert.ToDecimal(1.80),
                     Title = "Integration Test Product",
                     Description = "Integration TEST Product",
