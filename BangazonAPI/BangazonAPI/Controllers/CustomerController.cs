@@ -32,7 +32,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(string sort, string FirstNameParam, string LastNameParam, int Limit)
+        public async Task<IActionResult> Get(string include, string q)
         {
             using (SqlConnection conn = Connection)
             {
@@ -40,17 +40,21 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     string query = "SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer";
-                    if (Limit != 0)
+                    if (include == "products")
                     {
-                        query = $"SELECT TOP {Limit} Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer";
+                        query = $"SELECT c.Id AS 'Id', c.FirstName AS 'FirstName', c.LastName AS 'LastName', " +
+                            $"c.CreationDate AS 'CreationDate', c.LastActiveDate AS 'LastActive', " +
+                            $"p.Id AS 'ProductId', p.ProductTypeId AS 'ProductTypeId', p.price AS 'Price'," +
+                            $"p.title AS 'title', p.quantity AS 'Quantity', p.description AS 'Description' FROM Customer c" +
+                            $"JOIN product p ON p.customerId = c.Id";
                     }
-                    if (FirstNameParam == "mic")
+                    if (include == "payments")
                     {
-                        query = $"WHERE FirstName LIKE '%{FirstNameParam}%'";
+                        query = $"SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer WHERE FirstName LIKE %{FirstNameParam}%";
                     }
                     if (LastNameParam == "mic")
                     {
-                        query = $"WHERE LastName LIKE '%{LastNameParam}%'";
+                        query = $"SELECT Id, FirstName, LastName, CreationDate, LastActiveDate FROM Customer WHERE LastName LIKE %{LastNameParam}%";
                     }
                     cmd.CommandText = query;
                     SqlDataReader reader = cmd.ExecuteReader();
