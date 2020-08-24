@@ -10,16 +10,14 @@ namespace TestBangazonAPI
 {
     public class DatabaseFixture : IDisposable
     {
-        private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS03;Database=BangazonAPI;Trusted_Connection=True;";
+        private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS01;Database=BangazonAPI;Trusted_Connection=True;";
         public PaymentType TestPaymentType { get; set; }
-
-        public ProductType TestProductType { get; set; }
-
-
-
-        //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
+   
+ //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
         public Product TestProduct { get; set; }
         public Product TestDeleteProduct { get; set; }
+        public Order TestOrder { get; set; }
+        public Order TestDeleteOrder { get; set; }
         public DatabaseFixture()
         {
               PaymentType newpaymenttype = new PaymentType
@@ -29,15 +27,7 @@ namespace TestBangazonAPI
                 Name = "hkkdkldnhjsk",
                 CustomerId = 2
             };
-
-            ProductType newProductType = new ProductType
-            {
-                Name = "Test Product Type",
-
-            };
-
-
-
+            
             //Object for GET, POST, PUT
             Product newProduct = new Product
             {
@@ -60,23 +50,21 @@ namespace TestBangazonAPI
                 Quantity = 1
             };
 
+            //New Order object for GET, POST, PUT
+            Order newOrder = new Order
+            {
+                CustomerId = 2,
+                PaymentTypeId = 3
+            };
 
+            //New Order object for DELETE
+            Order newDeleteOrder = new Order
+            {
+                CustomerId = 2,
+                PaymentTypeId = 3
+            };
 
             using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @$"INSERT INTO ProductType (Name)
-                                        OUTPUT INSERTED.Id
-                                        VALUES ( '{newProductType.Name}')";
-                    int newId = (int)cmd.ExecuteScalar();
-                    newProductType.Id = newId;
-                    TestProductType = newProductType;
-                }
-            }
-
-                using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
@@ -88,11 +76,9 @@ namespace TestBangazonAPI
                     newpaymenttype.Id = newId;
                     TestPaymentType = newpaymenttype;
                 }
-
-
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    //Inserts the first object into the database
+                    //Inserts the first product object into the database
                     cmd.CommandText = $@"INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
                                         OUTPUT INSERTED.Id
                                         VALUES ({newProduct.ProductTypeId}, {newProduct.CustomerId}, {newProduct.Price}, '{newProduct.Title}', '{newProduct.Description}', {newProduct.Quantity})";
@@ -113,6 +99,28 @@ namespace TestBangazonAPI
                     newDeleteProduct.Id = newId;
                     TestDeleteProduct = newDeleteProduct;
                 }
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    //Executes exactly like the product object creation
+                    cmd.CommandText = $@"INSERT INTO [Order] (CustomerId, PaymentTypeId)
+                                        OUTPUT INSERTED.Id
+                                        VALUES ({newOrder.CustomerId}, {newOrder.PaymentTypeId})";
+                    int newId = (int)cmd.ExecuteScalar();
+                    newOrder.Id = newId;
+                    TestOrder = newOrder;
+                }
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    //Executes exactly like the product object creation
+                    cmd.CommandText = $@"INSERT INTO [Order] (CustomerId, PaymentTypeId)
+                                        OUTPUT INSERTED.Id
+                                        VALUES ({newDeleteOrder.CustomerId}, {newDeleteOrder.PaymentTypeId})";
+                    int newId = (int)cmd.ExecuteScalar();
+                    newDeleteOrder.Id = newId;
+                    TestDeleteOrder = newDeleteOrder;
+                }
             }
         }
         public void Dispose()
@@ -122,12 +130,16 @@ namespace TestBangazonAPI
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @$"DELETE FROM ProductType WHERE Name='Test Product Type' ";
-                    cmd.ExecuteNonQuery();
-                    cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test' ";
+                    cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test'";
                     cmd.ExecuteNonQuery();
                     //Disposes of all test products when the tests finish
                     cmd.CommandText = @$"DELETE FROM Product WHERE Title='Integration Test Product'";
+                    cmd.ExecuteNonQuery();
+
+                    //Disposes of all test orders when the tests finish
+                    cmd.CommandText = @$"DELETE o FROM [Order] o 
+                                        JOIN PaymentType pt ON o.PaymentTypeId = pt.Id
+                                        WHERE pt.Name='INTEGRATION TEST'";
                     cmd.ExecuteNonQuery();
                 }
             }
