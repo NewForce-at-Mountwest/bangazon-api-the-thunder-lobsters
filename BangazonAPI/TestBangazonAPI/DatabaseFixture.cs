@@ -12,8 +12,12 @@ namespace TestBangazonAPI
     {
         private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS03;Database=BangazonAPI;Trusted_Connection=True;";
         public PaymentType TestPaymentType { get; set; }
-   
- //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
+
+        public ProductType TestProductType { get; set; }
+
+
+
+        //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
         public Product TestProduct { get; set; }
         public Product TestDeleteProduct { get; set; }
         public DatabaseFixture()
@@ -25,6 +29,15 @@ namespace TestBangazonAPI
                 Name = "hkkdkldnhjsk",
                 CustomerId = 2
             };
+
+            ProductType newProductType = new ProductType
+            {
+                Name = "Test Product Type",
+
+            };
+
+
+
             //Object for GET, POST, PUT
             Product newProduct = new Product
             {
@@ -47,7 +60,23 @@ namespace TestBangazonAPI
                 Quantity = 1
             };
 
+
+
             using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @$"INSERT INTO ProductType (Name)
+                                        OUTPUT INSERTED.Id
+                                        VALUES ( '{newProductType.Name}')";
+                    int newId = (int)cmd.ExecuteScalar();
+                    newProductType.Id = newId;
+                    TestProductType = newProductType;
+                }
+            }
+
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
@@ -59,6 +88,8 @@ namespace TestBangazonAPI
                     newpaymenttype.Id = newId;
                     TestPaymentType = newpaymenttype;
                 }
+
+
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     //Inserts the first object into the database
@@ -91,7 +122,9 @@ namespace TestBangazonAPI
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test'";
+                    cmd.CommandText = @$"DELETE FROM ProductType WHERE Name='Test Product Type' ";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test' ";
                     cmd.ExecuteNonQuery();
                     //Disposes of all test products when the tests finish
                     cmd.CommandText = @$"DELETE FROM Product WHERE Title='Integration Test Product'";
