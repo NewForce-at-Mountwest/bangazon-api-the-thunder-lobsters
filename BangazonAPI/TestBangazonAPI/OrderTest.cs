@@ -54,7 +54,7 @@ namespace TestBangazonAPI
                 //Creates a new order and converts it to JSON
                 Order newOrder = new Order
                 {
-                    CustomerId = 6,
+                    CustomerId = 2,
                     PaymentTypeId = 3
                 };
                 string jsonOrder = JsonConvert.SerializeObject(newOrder);
@@ -101,7 +101,7 @@ namespace TestBangazonAPI
                 //Creates a slightly altered version of the test order
                 Order editedOrder = new Order
                 {
-                    CustomerId = 5,
+                    CustomerId = 3,
                     PaymentTypeId = 3
                 };
 

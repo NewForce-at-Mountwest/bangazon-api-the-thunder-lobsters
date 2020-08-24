@@ -42,9 +42,11 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //The default SQL query if no string queires are passed
                     string query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId'
                                      FROM [Order] o ";
 
+                    //SQL suery to include product objects in the API
                     if (_include == "products")
                     {
                         query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', p.Id AS 'ProductKey', p.ProductTypeId, p.CustomerId as 'ProductCustomerId', p.Price, p.Title, p.Description, p.Quantity
@@ -53,6 +55,7 @@ namespace StudentExercisesAPI.Controllers
                                   LEFT JOIN Product p ON op.ProductId = p.Id ";
                     }
 
+                    //SQL query to include customer objects in the API
                     if (_include == "customer")
                     {
                         query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', c.Id AS 'CustomerKey', c.FirstName, c.LastName, c.CreationDate, c.LastActiveDate
@@ -60,6 +63,7 @@ namespace StudentExercisesAPI.Controllers
                                   LEFT JOIN Customer c ON o.CustomerId = c.Id";
                     }
 
+                    //SQL query additions to include or exclude completed orders
                     if (_completed == "false")
                     {
                         query += @"WHERE PaymentTypeId IS NULL";
@@ -86,6 +90,7 @@ namespace StudentExercisesAPI.Controllers
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("OrderKey")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("OrderCustomerId")),
+                                //Includes the PaymentTypeId only if it's not null in the database
                                 PaymentTypeId = reader.GetInt32(reader.GetOrdinal("OrderPaymentTypeId"))
                             };
                         }
@@ -95,21 +100,27 @@ namespace StudentExercisesAPI.Controllers
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("OrderKey")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("OrderCustomerId")),
+                                //PaymentTypeId is null in the database here, so it's set to null
                                 PaymentTypeId = null
                             };
                         }
 
+                        //If this order is not already listed, add it to the list
                         if (!orderList.Any(orderFromList => orderFromList.Id == orderFromRepo.Id))
                         {
                             orderList.Add(orderFromRepo);
                         }
 
+                        //Runs only if the string query is added to include products
                         if (_include == "products")
                         {
+                            //Finds the current order, so that the product can be added to it
                             Order orderToAddTo = orderList.FirstOrDefault(orderFromList => orderFromList.Id == orderFromRepo.Id);
 
+                            //Runs if the current Product is not null in the database
                             if (!reader.IsDBNull("ProductKey"))
                             {
+                                //Creates a new Product object
                                 Product productFromRepo = new Product
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("ProductKey")),
@@ -121,6 +132,7 @@ namespace StudentExercisesAPI.Controllers
                                     Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
                                 };
 
+                                //Adds the Product to the Order if it's not already there
                                 if (!orderToAddTo.productsInOrder.Any(productFromList => productFromList.Id == productFromRepo.Id))
                                 {
                                     orderToAddTo.productsInOrder.Add(productFromRepo);
@@ -128,10 +140,13 @@ namespace StudentExercisesAPI.Controllers
                             }
                         }
 
+                        //Runs only if the string query is added to include a customer
                         if (_include == "customer")
                         {
+                            //Finds the current order, so that the customer can be added to it
                             Order orderToAddTo = orderList.FirstOrDefault(orderFromList => orderFromList.Id == orderFromRepo.Id);
 
+                            //Runs if the customer is not null in the database
                             if (!reader.IsDBNull("CustomerKey"))
                             {
                                 Customer customerFromRepo = new Customer
@@ -143,6 +158,7 @@ namespace StudentExercisesAPI.Controllers
                                     LastActive = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
                                 };
 
+                                //Adds the Customer to the Order
                                 orderToAddTo.customerForOrder = customerFromRepo; 
                             }
                         }
@@ -165,10 +181,12 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //Default SQL query for getting a single order
                     string query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId'
                                      FROM [Order] o 
                                      WHERE o.Id = @id ";
 
+                    //New SQL query if a string query is added to include products
                     if (_include == "products")
                     {
                         query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', p.Id AS 'ProductKey', p.ProductTypeId, p.CustomerId as 'ProductCustomerId', p.Price, p.Title, p.Description, p.Quantity
@@ -178,6 +196,7 @@ namespace StudentExercisesAPI.Controllers
                                   WHERE o.Id = @id ";
                     }
 
+                    //New SQL query if a string query is added to include customer
                     if (_include == "customer")
                     {
                         query = @"SELECT o.Id AS 'OrderKey', o.CustomerId AS 'OrderCustomerId', o.PaymentTypeId AS 'OrderPaymentTypeId', c.Id AS 'CustomerKey', c.FirstName, c.LastName, c.CreationDate, c.LastActiveDate
@@ -193,6 +212,7 @@ namespace StudentExercisesAPI.Controllers
 
                     Order orderFromRepo = null;
 
+                    //To understand the logic behind adding PaymentTypeIds, Products, and Customers, review the commented code for the first GET method
                     while (reader.Read())
                     {
                         //Creates a new object from the data found in the corresponding columns of the database
@@ -269,6 +289,7 @@ namespace StudentExercisesAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //Adds an order to the database if a PaymentTypeId is included
                     if (orderToAdd.PaymentTypeId != null)
                     {
                         //SQL query to insert the object parameter into the database. Properties of the object are passed into the query as SQL parameters
@@ -279,6 +300,7 @@ namespace StudentExercisesAPI.Controllers
                         cmd.Parameters.Add(new SqlParameter("@customerId", orderToAdd.CustomerId));
                         cmd.Parameters.Add(new SqlParameter("@paymentTypeId", orderToAdd.PaymentTypeId));
                     }
+                    //Creates a database order with a null PaymentTypeId if none is passed in
                     else
                     {
                         cmd.CommandText = @"INSERT INTO [Order] (CustomerId)
