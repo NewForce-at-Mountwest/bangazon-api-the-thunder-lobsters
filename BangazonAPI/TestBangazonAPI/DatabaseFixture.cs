@@ -12,8 +12,9 @@ namespace TestBangazonAPI
     {
         private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS01;Database=BangazonAPI;Trusted_Connection=True;";
         public PaymentType TestPaymentType { get; set; }
-   
- //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
+        public ProductType TestProductType { get; set; }
+
+        //Creates two product objects for testing: one for the GET, POST, and PUT tests, and another for the DELETE method
         public Product TestProduct { get; set; }
         public Product TestDeleteProduct { get; set; }
         public Order TestOrder { get; set; }
@@ -27,7 +28,12 @@ namespace TestBangazonAPI
                 Name = "hkkdkldnhjsk",
                 CustomerId = 2
             };
-            
+
+            ProductType newProductType = new ProductType
+            {
+                Name = "Test Product Type",
+            };
+
             //Object for GET, POST, PUT
             Product newProduct = new Product
             {
@@ -67,6 +73,15 @@ namespace TestBangazonAPI
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @$"INSERT INTO ProductType (Name)
+                                        OUTPUT INSERTED.Id
+                                        VALUES ( '{newProductType.Name}')";
+                    int newId = (int)cmd.ExecuteScalar();
+                    newProductType.Id = newId;
+                    TestProductType = newProductType;
+                }
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @$"INSERT INTO PaymentType (AcctNumber, Name, CustomerId)
@@ -130,16 +145,15 @@ namespace TestBangazonAPI
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @$"DELETE FROM PaymentType WHERE AcctNumber='test'";
-                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = @$"DELETE FROM ProductType WHERE Name='Test Product Type' ";
+                    cmd.CommandText += @$"DELETE FROM PaymentType WHERE AcctNumber='test' ";
                     //Disposes of all test products when the tests finish
-                    cmd.CommandText = @$"DELETE FROM Product WHERE Title='Integration Test Product'";
-                    cmd.ExecuteNonQuery();
+                    cmd.CommandText += @$"DELETE FROM Product WHERE Title='Integration Test Product' ";
 
                     //Disposes of all test orders when the tests finish
-                    cmd.CommandText = @$"DELETE o FROM [Order] o 
+                    cmd.CommandText += @$"DELETE o FROM [Order] o 
                                         JOIN PaymentType pt ON o.PaymentTypeId = pt.Id
-                                        WHERE pt.Name='INTEGRATION TEST'";
+                                        WHERE pt.Name='INTEGRATION TEST' ";
                     cmd.ExecuteNonQuery();
                 }
             }
