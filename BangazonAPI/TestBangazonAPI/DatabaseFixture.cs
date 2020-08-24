@@ -14,7 +14,7 @@ namespace TestBangazonAPI
         private readonly string ConnectionString = @$"Server=localhost\SQLEXPRESS;Database=BangazonAPI;Trusted_Connection=True;";
 
 
-
+        //creates two customer objects for GET, POST, PUT and another for DELETE
         public Customer TestCustomer
         {
             get; set;
@@ -37,12 +37,14 @@ namespace TestBangazonAPI
                 CreationDate = "2020-08-16",
                     LastActiveDate = "2020-08-16"
                     };
-       
 
         
 
-        
-              PaymentType newpaymenttype = new PaymentType
+
+
+
+
+            PaymentType newpaymenttype = new PaymentType
             {
                 
                 AcctNumber = "test",
@@ -70,7 +72,7 @@ namespace TestBangazonAPI
                 Description = "Integration Delete Test Product",
                 Quantity = 1
             };
-
+            //CUSTOMER OBJECT
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
