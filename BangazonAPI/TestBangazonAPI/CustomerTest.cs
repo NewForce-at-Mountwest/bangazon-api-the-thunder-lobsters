@@ -1,5 +1,5 @@
 ﻿using BangazonAPI.Models;
-using BangazonAPITests;
+using TestBangazonAPI;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -13,7 +13,7 @@ using TestBangazonAPI;
 using Xunit;
 
 
-namespace BangazonAPITest
+namespace TestBangazonAPI
 {
     public class CustomerTest : IClassFixture<DatabaseFixture>
     {
@@ -119,7 +119,7 @@ namespace BangazonAPITest
                 // Arrange
                 Customer editedCustomer = new Customer()
                 {
-                    FirstName = "Edit Test name",
+                    FirstName = "Test name",
                     LastName = "Edit Test name",
                     CreationDate = "2020-08-16",
                     LastActiveDate = "2020-08-16"

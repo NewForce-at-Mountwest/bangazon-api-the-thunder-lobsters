@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Text;
 using System.Linq;
 
-namespace BangazonAPITests
+namespace TestBangazonAPI
 {
     public class DatabaseFixture : IDisposable
     {
@@ -87,7 +87,8 @@ namespace BangazonAPITests
 
                     TestCustomer = newCustomer;
                 }
-            
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
                     cmd.CommandText = @$"INSERT INTO PaymentType (AcctNumber, Name, CustomerId)
                                         OUTPUT INSERTED.Id
                                         VALUES ('{newpaymenttype.AcctNumber}', '{newpaymenttype.Name}', '{newpaymenttype.CustomerId}')";

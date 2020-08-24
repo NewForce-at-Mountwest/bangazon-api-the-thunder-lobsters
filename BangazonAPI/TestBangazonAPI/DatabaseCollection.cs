@@ -1,4 +1,4 @@
-﻿using BangazonAPITests;
+﻿using TestBangazonAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -79,52 +79,56 @@ namespace BangazonAPI.Controllers
                             
                         };
 
-                        if (_include == "payments")
+                        PaymentType currentPayment = null;
+                        //TODO:: && !reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")) <- CHECK THIS CONDITION ALSO
+                        if (_include == "payments" && !reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")))
                         {
-                            PaymentType paymentType = new PaymentType
+                            currentPayment = new PaymentType
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("PaymentTypeId")),
-                                AcctNumber = reader.GetInt32(reader.GetOrdinal("Account#")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                AcctNumber = reader.GetString(reader.GetOrdinal("Account#")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("Id")),
                                 Name = reader.GetString(reader.GetOrdinal("PaymentName"))
                             };
 
-                            if (customers.FirstOrDefault(customer => customer.Id == paymentType.CustomerId) == null)
+                            if (customers.FirstOrDefault(customer => customer.Id == currentPayment.CustomerId) == null)
                             {
-                                customer.payments.Add(paymentType);
+                                customer.payments.Add(currentPayment);
                                 customers.Add(customer);
                             }
                             else
                             {
-                                Customer customerWithPayment = customers.FirstOrDefault(customer => customer.Id == paymentType.CustomerId);
-                                customerWithPayment.payments.Add(paymentType);
+                                Customer customerWithPayment = customers.FirstOrDefault(customer => customer.Id == currentPayment.CustomerId);
+                                customerWithPayment.payments.Add(currentPayment);
                             }
                         }
-                        else if (_include == "products")
+                        Product currentProduct = null;
+                        //TODO:: CHECK ANOTHER CONDITION FOR !reader.IsDBNull(reader.GetOrdinal("ProductId"))
+                        if (_include == "products" && !reader.IsDBNull(reader.GetOrdinal("ProductId")))
                         {
-                            Product product = new Product
+                            currentProduct = new Product
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
                                 Title = reader.GetString(reader.GetOrdinal("title")),
                                 ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("Id")),
                                 Description = reader.GetString(reader.GetOrdinal("Description")),
                                 Price = reader.GetDecimal(reader.GetOrdinal("Price")),
                                 Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
                             };
 
-                            if (customers.FirstOrDefault(customer => customer.Id == product.CustomerId) == null)
+                            if (customers.FirstOrDefault(customer => customer.Id == currentProduct.CustomerId) == null)
                             {
-                                customer.products.Add(product);
+                                customer.products.Add(currentProduct);
                                 customers.Add(customer);
                             }
                             else
                             {
-                                Customer customerWithProducts = customers.FirstOrDefault(customer => customer.Id == product.CustomerId);
-                                customerWithProducts.products.Add(product);
+                                Customer customerWithProducts = customers.FirstOrDefault(customer => customer.Id == currentProduct.CustomerId);
+                                customerWithProducts.products.Add(currentProduct);
                             }
 
-                            if (customers.FirstOrDefault(customer => customer.Id == product.CustomerId) == null)
+                            if (customers.FirstOrDefault(customer => customer.Id == currentProduct.CustomerId) == null)
                             {
                                 customers.Add(customer);
                             }
