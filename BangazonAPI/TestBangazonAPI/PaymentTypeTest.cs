@@ -89,7 +89,7 @@ namespace TestBangazonAPI
             using (var client = new APIClientProvider().Client)
             {
                 // Arrange
-                //Creates an edited version of the test product
+                //Creates an edited version of the test payment type
                 PaymentType editedPaymentType = new PaymentType()
                 {
                     AcctNumber = "test",
