@@ -54,8 +54,17 @@ namespace TestBangazonAPI
                 //Creates a new order and converts it to JSON
                 Order newOrder = new Order
                 {
-                    CustomerId = 2,
-                    PaymentTypeId = 3
+                    CustomerId = 1,
+                    PaymentTypeId = 1,
+                    customerForOrder =
+                    {
+                         Id = 1,
+                         FirstName = "Dylan",
+                        LastName = "Bisop",
+                        CreationDate = "8/16/2020 11:46:23 AM",
+                            LastActiveDate =  "8/16/2020 11:46:23 AM"
+       
+                    }
                 };
                 string jsonOrder = JsonConvert.SerializeObject(newOrder);
 
@@ -101,8 +110,17 @@ namespace TestBangazonAPI
                 //Creates a slightly altered version of the test order
                 Order editedOrder = new Order
                 {
-                    CustomerId = 3,
-                    PaymentTypeId = 3
+                    CustomerId = 1,
+                    PaymentTypeId = 2,
+                    customerForOrder =
+                    {
+                        Id = 1,
+                        FirstName = "Dylan",
+                        LastName = "Bisop",
+                        CreationDate = "8/16/2020 11:46:23 AM",
+                        LastActiveDate =  "8/16/2020 11:46:23 AM"
+
+                   }
                 };
 
                 // Act
@@ -118,6 +136,7 @@ namespace TestBangazonAPI
 
                 // Assert
                 //Test succeeds if the response generates a 204, and if the CustomerId of the passed object is the same as the one gotten from the API after the edit
+                
                 Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
                 Assert.Equal(editedOrder.CustomerId, singleOrder.CustomerId);
 
