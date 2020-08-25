@@ -154,8 +154,8 @@ namespace StudentExercisesAPI.Controllers
                                     Id = reader.GetInt32(reader.GetOrdinal("CustomerKey")),
                                     FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                     LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                    AccountCreated = reader.GetDateTime(reader.GetOrdinal("CreationDate")),
-                                    LastActive = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
+                                    CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")).ToString(),
+                                    LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate")).ToString()
                                 };
 
                                 //Adds the Customer to the Order
@@ -263,8 +263,8 @@ namespace StudentExercisesAPI.Controllers
                                     Id = reader.GetInt32(reader.GetOrdinal("CustomerKey")),
                                     FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                     LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                    AccountCreated = reader.GetDateTime(reader.GetOrdinal("CreationDate")),
-                                    LastActive = reader.GetDateTime(reader.GetOrdinal("LastActiveDate"))
+                                    CreationDate = reader.GetDateTime(reader.GetOrdinal("CreationDate")).ToString(),
+                                    LastActiveDate = reader.GetDateTime(reader.GetOrdinal("LastActiveDate")).ToString()
                                 };
 
                                 orderFromRepo.customerForOrder = customerFromRepo;
